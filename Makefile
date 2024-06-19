@@ -1,20 +1,35 @@
 PROJECT_NAME = prometheus-slurm-exporter
-ifndef GOPATH
-	GOPATH=$(shell pwd):/usr/share/gocode
-endif
-GOFILES=accounts.go cpus.go gpus.go main.go node.go nodes.go partitions.go queue.go scheduler.go sshare.go users.go
-GOBIN=bin/$(PROJECT_NAME)
+ROOTDIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
+SRCDIR := $(ROOTDIR)
+GOPATH := $(SRCDIR)/go/modules
+GOBIN := bin/$(PROJECT_NAME)
+GOFILES := $(wildcard $(SRCIR)/*.go)
+GOFLAGS = -v
+GOTESTFLAGS =
 
-build:
-	mkdir -p $(shell pwd)/bin
-	@echo "Build $(GOFILES) to $(GOBIN)"
-	@GOPATH=$(GOPATH) go build -o $(GOBIN) $(GOFILES)
+all: $(GOBIN)
 
-test:
-	@GOPATH=$(GOPATH) go test -v *.go
+download: go/modules/pkg/mod
 
-run:
-	@GOPATH=$(GOPATH) go run $(GOFILES)
+.PHONY: build
+build: $(GOBIN)
 
+$(GOBIN): $(GOFILES)
+	mkdir -p bin
+	@echo "Building $(GOBIN)"
+	go build $(GOFLAGS) -o $(GOBIN)
+
+go/modules/pkg/mod: go.mod
+	go mod download
+
+.PHONY: test
+test: go/modules/pkg/mod $(GOFILES)
+	go test -v
+
+run: $(GOBIN)
+	$(GOBIN)
+
+.PHONY: clean
 clean:
-	if [ -f ${GOBIN} ] ; then rm -f ${GOBIN} ; fi
+	go clean -modcache
+	rm -fr bin/ go/
