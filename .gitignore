@@ -1,3 +1,16 @@
-bin/
-go/
-*.snap
+# Folders
+_obj
+_test
+
+*.exe
+dependencies-stamp
+/slurm_exporter
+/.build
+/.deps
+/.release
+/.tarballs
+
+# IDEs
+/.vscode
+/.idea
+*.iml
