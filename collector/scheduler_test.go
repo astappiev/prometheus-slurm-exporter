@@ -1,36 +1,28 @@
-/* Copyright 2017 Victor Penso, Matteo Dessalvi
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-
 package collector
 
 import (
-	"io/ioutil"
+	"github.com/stretchr/testify/assert"
+	"io"
 	"os"
 	"testing"
 )
 
 func TestSchedulerMetrics(t *testing.T) {
 	// Read the input data from a file
-	file, err := os.Open("test_data/sdiag.txt")
-	if err != nil {
-		t.Fatalf("Can not open test data: %v", err)
-	}
-	data, err := ioutil.ReadAll(file)
-	t.Logf("%+v", ParseSchedulerMetrics(data))
-}
+	file, _ := os.Open("fixtures/sdiag/sdiag.txt")
+	data, _ := io.ReadAll(file)
+	schedulerMetrics := ParseSchedulerMetrics(data)
 
-func TestSchedulerGetMetrics(t *testing.T) {
-	t.Logf("%+v", SchedulerGetMetrics())
+	assert.Equal(t, 2.0, schedulerMetrics.threads)
+	assert.Equal(t, 0.0, schedulerMetrics.queueSize)
+	assert.Equal(t, 0.0, schedulerMetrics.dbdQueueSize)
+	assert.Equal(t, 2291.0, schedulerMetrics.lastCycle)
+	assert.Equal(t, 2498.0, schedulerMetrics.meanCycle)
+	assert.Equal(t, 1.0, schedulerMetrics.cyclePerMinute)
+	assert.Equal(t, 5909.0, schedulerMetrics.backfillLastCycle)
+	assert.Equal(t, 4799.0, schedulerMetrics.backfillMeanCycle)
+	assert.Equal(t, 37.0, schedulerMetrics.backfillDepthMean)
+	assert.Equal(t, 155.0, schedulerMetrics.totalBackfilledJobsSinceStart)
+	assert.Equal(t, 6.0, schedulerMetrics.totalBackfilledJobsSinceCycle)
+	assert.Equal(t, 0.0, schedulerMetrics.totalBackfilledHeterogeneous)
 }

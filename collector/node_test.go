@@ -1,60 +1,32 @@
-/* Copyright 2021 Chris Read
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-
 package collector
 
 import (
-	"io/ioutil"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-/*
-For this example data line:
-
-a048,79384,193000,3/13/0/16,mix
-
-We want output that looks like:
-
-slurm_node_cpus_allocated{name="a048",status="mix"} 3
-slurm_node_cpus_idle{name="a048",status="mix"} 3
-slurm_node_cpus_other{name="a048",status="mix"} 0
-slurm_node_cpus_total{name="a048",status="mix"} 16
-slurm_node_mem_allocated{name="a048",status="mix"} 179384
-slurm_node_mem_total{name="a048",status="mix"} 193000
-slurm_node_gpu_allocated{gputype="rtx5000",name="a048",status="mix"} 2
-slurm_node_gpu_total{gputype="rtx5000",name="a048",status="mix"} 4
-*/
-
 func TestNodeMetrics(t *testing.T) {
 	// Read the input data from a file
-	data, err := ioutil.ReadFile("test_data/sinfo_mem.txt")
-	if err != nil {
-		t.Fatalf("Can not open test data: %v", err)
-	}
+	file, _ := os.Open("fixtures/sinfo/node.txt")
+	data, _ := io.ReadAll(file)
 	metrics := ParseNodeMetrics(data)
-	t.Logf("%+v", metrics)
 
-	assert.Contains(t, metrics, "b001")
-	assert.Equal(t, uint64(327680), metrics["b001"].memAlloc)
-	assert.Equal(t, uint64(386000), metrics["b001"].memTotal)
-	assert.Equal(t, uint64(32), metrics["b001"].cpuAlloc)
-	assert.Equal(t, uint64(0), metrics["b001"].cpuIdle)
-	assert.Equal(t, uint64(0), metrics["b001"].cpuOther)
-	assert.Equal(t, uint64(32), metrics["b001"].cpuTotal)
-	assert.Equal(t, uint64(4), metrics["b001"].gpuAlloc)
-	assert.Equal(t, uint64(4), metrics["b001"].gpuTotal)
+	assert.Contains(t, metrics, "gpunode05")
+	assert.Equal(t, float64(0), metrics["gpunode05"].memAlloc)
+	assert.Equal(t, float64(515500), metrics["gpunode05"].memTotal)
+	assert.Equal(t, float64(60), metrics["gpunode05"].cpu.alloc)
+	assert.Equal(t, float64(68), metrics["gpunode05"].cpu.idle)
+	assert.Equal(t, float64(0), metrics["gpunode05"].cpu.other)
+	assert.Equal(t, float64(128), metrics["gpunode05"].cpu.total)
+	assert.Equal(t, "a100m40", metrics["gpunode05"].tres[0].name)
+	assert.Equal(t, float64(4), metrics["gpunode05"].tres[0].count)
+	assert.Equal(t, "a100m80", metrics["gpunode05"].tres[1].name)
+	assert.Equal(t, float64(4), metrics["gpunode05"].tres[1].count)
+	assert.Equal(t, "a100m40", metrics["gpunode05"].tresUsed[0].name)
+	assert.Equal(t, float64(4), metrics["gpunode05"].tresUsed[0].count)
+	assert.Equal(t, "a100m80", metrics["gpunode05"].tresUsed[1].name)
+	assert.Equal(t, float64(4), metrics["gpunode05"].tresUsed[1].count)
 }

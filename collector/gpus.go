@@ -1,4 +1,7 @@
-/* Copyright 2022 Joeri Hermans, Victor Penso, Matteo Dessalvi, Iztok Lebar Bajec
+/*
+	Copyright 2020 Joeri Hermans, Victor Penso, Matteo Dessalvi
+	Copyright 2022 Iztok Lebar Bajec
+	Copyright 2024 Oleh Astappiev
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,8 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package collector
 
 import (
-	"log"
-	"os/exec"
+	"github.com/go-kit/log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -31,10 +33,6 @@ type GPUsMetrics struct {
 	other       float64
 	total       float64
 	utilization float64
-}
-
-func GPUsGetMetrics() *GPUsMetrics {
-	return ParseGPUsMetrics()
 }
 
 func ParseAllocatedGPUs(data []byte) float64 {
@@ -142,11 +140,11 @@ func ParseTotalGPUs(data []byte) float64 {
 	return num_gpus
 }
 
-func ParseGPUsMetrics() *GPUsMetrics {
+func GetGPUsMetrics() *GPUsMetrics {
 	var gm GPUsMetrics
-	total_gpus := ParseTotalGPUs(TotalGPUsData())
-	allocated_gpus := ParseAllocatedGPUs(AllocatedGPUsData())
-	idle_gpus := ParseIdleGPUs(IdleGPUsData())
+	total_gpus, _ := GetTotalGPUs()
+	allocated_gpus, _ := GetAllocatedGPUs()
+	idle_gpus, _ := GetIdleGPUs()
 	other_gpus := total_gpus - allocated_gpus - idle_gpus
 	gm.alloc = allocated_gpus
 	gm.idle = idle_gpus
@@ -156,45 +154,31 @@ func ParseGPUsMetrics() *GPUsMetrics {
 	return &gm
 }
 
-func AllocatedGPUsData() []byte {
-	args := []string{"-a", "-h", "--Format=Nodes: ,GresUsed:", "--state=allocated"}
-	return Execute("sinfo", args)
-}
-
-func IdleGPUsData() []byte {
-	args := []string{"-a", "-h", "--Format=Nodes: ,Gres: ,GresUsed:", "--state=idle,allocated"}
-	return Execute("sinfo", args)
-}
-
-func TotalGPUsData() []byte {
-	args := []string{"-a", "-h", "--Format=Nodes: ,Gres:"}
-	return Execute("sinfo", args)
-}
-
-// Execute the sinfo command and return its output
-func Execute(command string, arguments []string) []byte {
-	cmd := exec.Command(command, arguments...)
-	out, err := cmd.CombinedOutput()
+func GetAllocatedGPUs() (float64, error) {
+	out, err := RunCommand("sinfo", "-a", "-h", "--Format=Nodes: ,GresUsed:", "--state=allocated")
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	return out
+
+	return ParseAllocatedGPUs(out), nil
 }
 
-/*
- * Implement the Prometheus Collector interface and feed the
- * Slurm scheduler metrics into it.
- * https://godoc.org/github.com/prometheus/client_golang/prometheus#Collector
- */
-
-func NewGPUsCollector() *GPUsCollector {
-	return &GPUsCollector{
-		alloc:       prometheus.NewDesc("slurm_gpus_alloc", "Allocated GPUs", nil, nil),
-		idle:        prometheus.NewDesc("slurm_gpus_idle", "Idle GPUs", nil, nil),
-		other:       prometheus.NewDesc("slurm_gpus_other", "Other GPUs", nil, nil),
-		total:       prometheus.NewDesc("slurm_gpus_total", "Total GPUs", nil, nil),
-		utilization: prometheus.NewDesc("slurm_gpus_utilization", "Total GPU utilization", nil, nil),
+func GetIdleGPUs() (float64, error) {
+	out, err := RunCommand("sinfo", "-a", "-h", "--Format=Nodes: ,Gres: ,GresUsed:", "--state=idle,allocated")
+	if err != nil {
+		return 0, err
 	}
+
+	return ParseIdleGPUs(out), nil
+}
+
+func GetTotalGPUs() (float64, error) {
+	out, err := RunCommand("sinfo", "-a", "-h", "--Format=Nodes: ,Gres:")
+	if err != nil {
+		return 0, err
+	}
+
+	return ParseTotalGPUs(out), nil
 }
 
 type GPUsCollector struct {
@@ -203,21 +187,31 @@ type GPUsCollector struct {
 	other       *prometheus.Desc
 	total       *prometheus.Desc
 	utilization *prometheus.Desc
+	logger      log.Logger
 }
 
-// Send all metric descriptions
-func (cc *GPUsCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- cc.alloc
-	ch <- cc.idle
-	ch <- cc.other
-	ch <- cc.total
-	ch <- cc.utilization
+func init() {
+	registerCollector("gpus", defaultEnabled, NewGPUsCollector)
 }
-func (cc *GPUsCollector) Collect(ch chan<- prometheus.Metric) {
-	cm := GPUsGetMetrics()
+
+func NewGPUsCollector(logger log.Logger) (Collector, error) {
+	return &GPUsCollector{
+		logger:      logger,
+		alloc:       prometheus.NewDesc("slurm_gpus_alloc", "Allocated GPUs", nil, nil),
+		idle:        prometheus.NewDesc("slurm_gpus_idle", "Idle GPUs", nil, nil),
+		other:       prometheus.NewDesc("slurm_gpus_other", "Other GPUs", nil, nil),
+		total:       prometheus.NewDesc("slurm_gpus_total", "Total GPUs", nil, nil),
+		utilization: prometheus.NewDesc("slurm_gpus_utilization", "Total GPU utilization", nil, nil),
+	}, nil
+}
+
+func (cc *GPUsCollector) Collect(ch chan<- prometheus.Metric) error {
+	cm := GetGPUsMetrics()
 	ch <- prometheus.MustNewConstMetric(cc.alloc, prometheus.GaugeValue, cm.alloc)
 	ch <- prometheus.MustNewConstMetric(cc.idle, prometheus.GaugeValue, cm.idle)
 	ch <- prometheus.MustNewConstMetric(cc.other, prometheus.GaugeValue, cm.other)
 	ch <- prometheus.MustNewConstMetric(cc.total, prometheus.GaugeValue, cm.total)
 	ch <- prometheus.MustNewConstMetric(cc.utilization, prometheus.GaugeValue, cm.utilization)
+
+	return nil
 }

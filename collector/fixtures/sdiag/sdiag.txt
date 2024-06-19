@@ -1,39 +1,110 @@
 *******************************************************
-sdiag output at Wed Apr 12 11:04:01 2017
-Data since      Wed Apr 12 02:00:00 2017
+sdiag output at Thu Jun 20 00:41:03 2024 (1718836863)
+Data since      Wed Jun 19 02:00:00 2024 (1718755200)
 *******************************************************
-Server thread count:  3
+Server thread count:  2
+RPC queue enabled:    0
 Agent queue size:     0
 Agent count:          0
+Agent thread count:   0
 DBD Agent queue size: 0
 
-Jobs submitted: 9706
-Jobs started:   35395
-Jobs completed: 31254
-Jobs canceled:  2835
+Jobs submitted: 37
+Jobs started:   37
+Jobs completed: 41
+Jobs canceled:  3
 Jobs failed:    0
 
+Job states ts:  Thu Jun 20 00:40:55 2024 (1718836855)
+Jobs pending:   31
+Jobs running:   31
+
 Main schedule statistics (microseconds):
-        Last cycle:   97209
-        Max cycle:    1407590
-        Total cycles: 34585
-        Mean cycle:   74593
-        Mean depth cycle:  103
-        Cycles per minute: 63
-        Last queue length: 57011
+        Last cycle:   2291
+        Max cycle:    9032
+        Total cycles: 1421
+        Mean cycle:   2498
+        Mean depth cycle:  37
+        Cycles per minute: 1
+        Last queue length: 31
+
+Main scheduler exit:
+        End of job queue:1421
+        Hit default_queue_depth: 0
+        Hit sched_max_job_start: 0
+        Blocked on licenses: 0
+        Hit max_rpc_cnt: 0
+        Timeout (max_sched_time): 0
 
 Backfilling stats
-        Total backfilled jobs (since last slurm start): 111544
-        Total backfilled jobs (since last stats cycle start): 793
-        Total backfilled heterogeneous job components: 10
-        Total cycles: 529
-        Last cycle when: Wed Apr 12 11:03:21 2017
-        Last cycle: 1942890
-        Max cycle:  5933334
-        Mean cycle: 1960820
-        Last depth cycle: 56
-        Last depth cycle (try sched): 56
-        Depth Mean: 29324
-        Depth Mean (try depth): 1659
-        Last queue length: 57064
-        Queue length mean: 40772
+        Total backfilled jobs (since last slurm start): 155
+        Total backfilled jobs (since last stats cycle start): 6
+        Total backfilled heterogeneous job components: 0
+        Total cycles: 1592
+        Last cycle when: Thu Jun 20 00:37:41 2024 (1718836661)
+        Last cycle: 5909
+        Max cycle:  9221
+        Mean cycle: 4799
+        Last depth cycle: 31
+        Last depth cycle (try sched): 31
+        Depth Mean: 37
+        Depth Mean (try depth): 37
+        Last queue length: 31
+        Queue length mean: 37
+        Last table size: 1
+        Mean table size: 1
+
+Backfill exit
+        End of job queue:1592
+        Hit bf_max_job_start: 0
+        Hit bf_max_job_test: 0
+        System state changed: 0
+        Hit table size limit (bf_node_space_size): 0
+        Timeout (bf_max_time): 0
+
+Latency for 1000 calls to gettimeofday(): 56 microseconds
+
+Remote Procedure Call statistics by message type
+        REQUEST_PARTITION_INFO                  ( 2009) count:253895 ave_time:70     total_time:17890779
+        REQUEST_FED_INFO                        ( 2049) count:252953 ave_time:93     total_time:23634503
+        REQUEST_JOB_USER_INFO                   ( 2039) count:252933 ave_time:133    total_time:33718284
+        REQUEST_STEP_COMPLETE                   ( 5016) count:2727   ave_time:227    total_time:620658
+        REQUEST_NODE_INFO                       ( 2007) count:2149   ave_time:253    total_time:545065
+        MESSAGE_NODE_REGISTRATION_STATUS        ( 1002) count:1910   ave_time:1534   total_time:2930859
+        MESSAGE_EPILOG_COMPLETE                 ( 6012) count:1783   ave_time:295    total_time:526112
+        REQUEST_COMPLETE_PROLOG                 ( 6018) count:1692   ave_time:148    total_time:251285
+        REQUEST_COMPLETE_BATCH_SCRIPT           ( 5018) count:1678   ave_time:681    total_time:1143724
+        REQUEST_SUBMIT_BATCH_JOB                ( 4003) count:1382   ave_time:856    total_time:1184249
+        REQUEST_JOB_STEP_CREATE                 ( 5001) count:862    ave_time:599    total_time:516872
+        REQUEST_HET_JOB_ALLOC_INFO              ( 4027) count:761    ave_time:133    total_time:101320
+        REQUEST_KILL_JOB                        ( 5032) count:647    ave_time:622    total_time:402559
+        REQUEST_JOB_INFO                        ( 2003) count:608    ave_time:1441   total_time:876398
+        REQUEST_JOB_READY                       ( 4019) count:232    ave_time:144    total_time:33416
+        REQUEST_COMPLETE_JOB_ALLOCATION         ( 5017) count:137    ave_time:1662   total_time:227738
+        REQUEST_RESOURCE_ALLOCATION             ( 4001) count:124    ave_time:1286   total_time:159581
+        REQUEST_CANCEL_JOB_STEP                 ( 5005) count:40     ave_time:479    total_time:19166
+        REQUEST_JOB_ALLOCATION_INFO             ( 4014) count:16     ave_time:93     total_time:1494
+        REQUEST_UPDATE_NODE                     ( 3002) count:14     ave_time:384    total_time:5389
+        REQUEST_STATS_INFO                      ( 2035) count:14     ave_time:230    total_time:3233
+        REQUEST_SHARE_INFO                      ( 2022) count:14     ave_time:196    total_time:2747
+        REQUEST_JOB_INFO_SINGLE                 ( 2021) count:7      ave_time:89     total_time:623
+        ACCOUNTING_UPDATE_MSG                   (10001) count:2      ave_time:55     total_time:111
+        REQUEST_BUILD_INFO                      ( 2001) count:1      ave_time:2184   total_time:2184
+        REQUEST_PING                            ( 1008) count:1      ave_time:85     total_time:85
+        REQUEST_STEP_LAYOUT                     ( 5021) count:1      ave_time:135    total_time:135
+        REQUEST_PERSIST_INIT                    ( 6500) count:1      ave_time:125    total_time:125
+
+Remote Procedure Call statistics by user
+        user1         (    1811) count:709171 ave_time:96     total_time:68782902
+        user2         (    1541) count:43916  ave_time:99     total_time:4348761
+        user3         (       0) count:17317  ave_time:481    total_time:8341293
+        user4         (    1456) count:2075   ave_time:469    total_time:973309
+        user5         (    1439) count:1666   ave_time:596    total_time:994266
+        user6         (    1691) count:722    ave_time:513    total_time:370989
+        user7         (    1523) count:585    ave_time:584    total_time:341943
+        user8         (    1703) count:354    ave_time:327    total_time:115939
+        user9         (   21055) count:259    ave_time:1103   total_time:285935
+        user10        (    1883) count:129    ave_time:498    total_time:64245
+
+Pending RPC statistics
+        No pending RPCs
