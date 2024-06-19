@@ -26,7 +26,7 @@ git clone https://github.com/vpenso/prometheus-slurm-exporter.git
 cd prometheus-slurm-exporter
 cp README.md ~/rpmbuild/SOURCES
 cp LICENSE ~/rpmbuild/SOURCES
-cp lib/systemd/prometheus-slurm-exporter.service ~/rpmbuild/SOURCES
+cp examples/systemd/prometheus-slurm-exporter.service ~/rpmbuild/SOURCES
 ```
 6. Copy the SPEC file in the proper directory:
 ```bash

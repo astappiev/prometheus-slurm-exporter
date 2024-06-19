@@ -13,7 +13,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-package main
+package collector
 
 import (
 	"io/ioutil"
@@ -21,16 +21,16 @@ import (
 	"testing"
 )
 
-func TestCPUsMetrics(t *testing.T) {
+func TestNodesMetrics(t *testing.T) {
 	// Read the input data from a file
-	file, err := os.Open("test_data/sinfo_cpus.txt")
+	file, err := os.Open("test_data/sinfo.txt")
 	if err != nil {
 		t.Fatalf("Can not open test data: %v", err)
 	}
 	data, err := ioutil.ReadAll(file)
-	t.Logf("%+v", ParseCPUsMetrics(data))
+	t.Logf("%+v", ParseNodesMetrics(data))
 }
 
-func TestCPUssGetMetrics(t *testing.T) {
-	t.Logf("%+v", CPUsGetMetrics())
+func TestNodesGetMetrics(t *testing.T) {
+	t.Logf("%+v", NodesGetMetrics())
 }

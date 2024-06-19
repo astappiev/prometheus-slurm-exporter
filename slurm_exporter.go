@@ -19,22 +19,23 @@ import (
 	"flag"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/vpenso/prometheus-slurm-exporter/collector"
 	"log"
 	"net/http"
 )
 
 func init() {
 	// Metrics have to be registered to be exposed
-	prometheus.MustRegister(NewAccountsCollector())   // from accounts.go
-	prometheus.MustRegister(NewCPUsCollector())       // from cpus.go
-	prometheus.MustRegister(NewNodesCollector())      // from nodes.go
-	prometheus.MustRegister(NewNodeCollector())       // from node.go
-	prometheus.MustRegister(NewPartitionsCollector()) // from partitions.go
-	prometheus.MustRegister(NewQueueCollector())      // from queue.go
-	prometheus.MustRegister(NewSchedulerCollector())  // from scheduler.go
-	prometheus.MustRegister(NewFairShareCollector())  // from sshare.go
-	prometheus.MustRegister(NewUsersCollector())      // from users.go
-	prometheus.MustRegister(NewJobsCollector())       // from jobs.go
+	prometheus.MustRegister(collector.NewAccountsCollector())   // from accounts.go
+	prometheus.MustRegister(collector.NewCPUsCollector())       // from cpus.go
+	prometheus.MustRegister(collector.NewNodesCollector())      // from nodes.go
+	prometheus.MustRegister(collector.NewNodeCollector())       // from node.go
+	prometheus.MustRegister(collector.NewPartitionsCollector()) // from partitions.go
+	prometheus.MustRegister(collector.NewQueueCollector())      // from queue.go
+	prometheus.MustRegister(collector.NewSchedulerCollector())  // from scheduler.go
+	prometheus.MustRegister(collector.NewFairShareCollector())  // from sshare.go
+	prometheus.MustRegister(collector.NewUsersCollector())      // from users.go
+	prometheus.MustRegister(collector.NewJobsCollector())       // from jobs.go
 
 	log.Printf("Initializing main program")
 }
@@ -54,7 +55,7 @@ func main() {
 
 	// Turn on GPUs accounting only if the corresponding command line option is set to true.
 	if *gpuAcct {
-		prometheus.MustRegister(NewGPUsCollector()) // from gpus.go
+		prometheus.MustRegister(collector.NewGPUsCollector()) // from gpus.go
 	}
 
 	// The Handler function provides a default handler to expose metrics
