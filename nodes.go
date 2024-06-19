@@ -84,7 +84,7 @@ func ParseNodesMetrics(input []byte) *NodesMetrics {
 			maint := regexp.MustCompile(`^maint`)
 			mix := regexp.MustCompile(`^mix`)
 			resv := regexp.MustCompile(`^res`)
-      		plnd := regexp.MustCompile(`^plan`)
+			plnd := regexp.MustCompile(`^plan`)
 			switch {
 			case alloc.MatchString(state) == true:
 				nm.alloc += count
