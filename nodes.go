@@ -37,7 +37,7 @@ type NodesMetrics struct {
 	maint float64
 	mix   float64
 	resv  float64
- plnd  float64
+	plnd  float64
 }
 
 func NodesGetMetrics() *NodesMetrics {
@@ -84,7 +84,7 @@ func ParseNodesMetrics(input []byte) *NodesMetrics {
 			maint := regexp.MustCompile(`^maint`)
 			mix := regexp.MustCompile(`^mix`)
 			resv := regexp.MustCompile(`^res`)
-      plnd := regexp.MustCompile(`^plan`)
+      		plnd := regexp.MustCompile(`^plan`)
 			switch {
 			case alloc.MatchString(state) == true:
 				nm.alloc += count
@@ -106,8 +106,8 @@ func ParseNodesMetrics(input []byte) *NodesMetrics {
 				nm.mix += count
 			case resv.MatchString(state) == true:
 				nm.resv += count
-     case plnd.MatchString(state) == true:
-       nm.plnd += count
+			case plnd.MatchString(state) == true:
+				nm.plnd += count
 			}
 		}
 	}
@@ -149,7 +149,7 @@ func NewNodesCollector() *NodesCollector {
 		maint: prometheus.NewDesc("slurm_nodes_maint", "Maint nodes", nil, nil),
 		mix:   prometheus.NewDesc("slurm_nodes_mix", "Mix nodes", nil, nil),
 		resv:  prometheus.NewDesc("slurm_nodes_resv", "Reserved nodes", nil, nil),
-   plnd:  prometheus.NewDesc("slurm_nodes_plnd", "Planned nodes", nil, nil),
+		plnd:  prometheus.NewDesc("slurm_nodes_plnd", "Planned nodes", nil, nil),
 	}
 }
 
@@ -164,7 +164,7 @@ type NodesCollector struct {
 	maint *prometheus.Desc
 	mix   *prometheus.Desc
 	resv  *prometheus.Desc
- plnd  *prometheus.Desc
+	plnd  *prometheus.Desc
 }
 
 // Send all metric descriptions
@@ -179,7 +179,7 @@ func (nc *NodesCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- nc.maint
 	ch <- nc.mix
 	ch <- nc.resv
- ch <- nc.plnd
+	ch <- nc.plnd
 }
 func (nc *NodesCollector) Collect(ch chan<- prometheus.Metric) {
 	nm := NodesGetMetrics()
@@ -193,5 +193,5 @@ func (nc *NodesCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(nc.maint, prometheus.GaugeValue, nm.maint)
 	ch <- prometheus.MustNewConstMetric(nc.mix, prometheus.GaugeValue, nm.mix)
 	ch <- prometheus.MustNewConstMetric(nc.resv, prometheus.GaugeValue, nm.resv)
- ch <- prometheus.MustNewConstMetric(nc.plnd, prometheus.GaugeValue, nm.plnd)
+	ch <- prometheus.MustNewConstMetric(nc.plnd, prometheus.GaugeValue, nm.plnd)
 }
