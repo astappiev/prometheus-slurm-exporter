@@ -18,7 +18,6 @@ package main
 import (
 	"log"
 	"os/exec"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -36,7 +35,7 @@ type NodeMetrics struct {
 	cpuTotal   uint64
 	gpuAlloc   uint64
 	gpuTotal   uint64
-	gpuType string
+	gpuType    string
 	nodeStatus string
 }
 
@@ -71,16 +70,16 @@ func ParseNodeMetrics(input []byte) map[string]*NodeMetrics {
 		cpuTotal, _ := strconv.ParseUint(cpuInfo[3], 10, 64)
 
 		if node[5] != "(null)" {
-		  // Ignore everything after opening parenthesis and split into type, name and count
-		  availableTRES := strings.Split(strings.Split(node[5], "(")[0], ":")
-		  usedTRES := strings.Split(strings.Split(node[6], "(")[0], ":")
-		  gpuType := availableTRES[1]
-		  gpuTotal, _ := strconv.ParseUint(availableTRES[2], 10, 64)
-		  gpuAlloc, _ := strconv.ParseUint(usedTRES[2], 10, 64)
+			// Ignore everything after opening parenthesis and split into type, name and count
+			availableTRES := strings.Split(strings.Split(node[5], "(")[0], ":")
+			usedTRES := strings.Split(strings.Split(node[6], "(")[0], ":")
+			gpuType := availableTRES[1]
+			gpuTotal, _ := strconv.ParseUint(availableTRES[2], 10, 64)
+			gpuAlloc, _ := strconv.ParseUint(usedTRES[2], 10, 64)
 
-		  nodes[nodeName].gpuAlloc = gpuAlloc
-		  nodes[nodeName].gpuTotal = gpuTotal
-		  nodes[nodeName].gpuType = gpuType
+			nodes[nodeName].gpuAlloc = gpuAlloc
+			nodes[nodeName].gpuTotal = gpuTotal
+			nodes[nodeName].gpuType = gpuType
 		}
 
 		nodes[nodeName].memAlloc = memAlloc
@@ -98,7 +97,7 @@ func ParseNodeMetrics(input []byte) map[string]*NodeMetrics {
 // NodeData executes the sinfo command to get data for each node
 // It returns the output of the sinfo command
 func NodeData() []byte {
-	cmd := exec.Command("sinfo", "-h", "-N", "-O", "NodeList,AllocMem,Memory,CPUsState,StateLong,Gres:50,Gresused:50")
+	cmd := exec.Command("sinfo", "-h", "-a", "-N", "-O", "NodeList: ,AllocMem: ,Memory: ,CPUsState: ,StateLong: ,Gres: ,Gresused:")
 	out, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
@@ -121,7 +120,7 @@ type NodeCollector struct {
 // It returns a set of collections for consumption
 func NewNodeCollector() *NodeCollector {
 	labels := []string{"node", "status"}
-	labels_gpu := []string{"node","status","gputype"}
+	labels_gpu := []string{"node", "status", "gputype"}
 
 	return &NodeCollector{
 		cpuAlloc: prometheus.NewDesc("slurm_node_cpu_alloc", "Allocated CPUs per node", labels, nil),
