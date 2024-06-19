@@ -43,6 +43,7 @@ func UsersData() []byte {
 
 type UserJobMetrics struct {
 	pending      float64
+	pending_cpus float64
 	running      float64
 	running_cpus float64
 	running_mem  float64
@@ -57,7 +58,7 @@ func ParseUsersMetrics(input []byte) map[string]*UserJobMetrics {
 			user := strings.Split(line, "|")[1]
 			_, key := users[user]
 			if !key {
-				users[user] = &UserJobMetrics{0, 0, 0, 0, 0}
+				users[user] = &UserJobMetrics{0, 0, 0, 0, 0, 0}
 			}
 			state := strings.Split(line, "|")[2]
 			state = strings.ToLower(state)
@@ -81,6 +82,7 @@ func ParseUsersMetrics(input []byte) map[string]*UserJobMetrics {
 			switch {
 			case pending.MatchString(state) == true:
 				users[user].pending++
+				users[user].pending_cpus += cpus
 			case running.MatchString(state) == true:
 				users[user].running++
 				users[user].running_cpus += cpus
@@ -95,6 +97,7 @@ func ParseUsersMetrics(input []byte) map[string]*UserJobMetrics {
 
 type UsersCollector struct {
 	pending      *prometheus.Desc
+	pending_cpus *prometheus.Desc
 	running      *prometheus.Desc
 	running_cpus *prometheus.Desc
 	running_mem  *prometheus.Desc
@@ -105,6 +108,7 @@ func NewUsersCollector() *UsersCollector {
 	labels := []string{"user"}
 	return &UsersCollector{
 		pending:      prometheus.NewDesc("slurm_user_jobs_pending", "Pending jobs for user", labels, nil),
+		pending_cpus: prometheus.NewDesc("slurm_user_cpus_pending", "Pending jobs for user", labels, nil),
 		running:      prometheus.NewDesc("slurm_user_jobs_running", "Running jobs for user", labels, nil),
 		running_cpus: prometheus.NewDesc("slurm_user_cpus_running", "Running cpus for user", labels, nil),
 		running_mem:  prometheus.NewDesc("slurm_user_mem_running", "Running mem for user", labels, nil),
@@ -114,6 +118,7 @@ func NewUsersCollector() *UsersCollector {
 
 func (uc *UsersCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- uc.pending
+	ch <- uc.pending_cpus
 	ch <- uc.running
 	ch <- uc.running_cpus
 	ch <- uc.running_mem
@@ -125,6 +130,9 @@ func (uc *UsersCollector) Collect(ch chan<- prometheus.Metric) {
 	for u := range um {
 		if um[u].pending > 0 {
 			ch <- prometheus.MustNewConstMetric(uc.pending, prometheus.GaugeValue, um[u].pending, u)
+		}
+		if um[u].pending_cpus > 0 {
+			ch <- prometheus.MustNewConstMetric(uc.pending_cpus, prometheus.GaugeValue, um[u].pending_cpus, u)
 		}
 		if um[u].running > 0 {
 			ch <- prometheus.MustNewConstMetric(uc.running, prometheus.GaugeValue, um[u].running, u)
