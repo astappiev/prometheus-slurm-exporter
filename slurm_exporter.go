@@ -115,7 +115,7 @@ func (h *handler) innerHandler(filters ...string) (http.Handler, error) {
 	// only once upon startup.
 	if len(filters) == 0 {
 		level.Info(h.logger).Log("msg", "Enabled collectors")
-		collectors := []string{}
+		var collectors []string
 		for n := range nc.Collectors {
 			collectors = append(collectors, n)
 		}

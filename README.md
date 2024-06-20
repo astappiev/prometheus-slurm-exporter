@@ -30,6 +30,13 @@ You need a Go development environment. Then, simply run `make` to build the exec
 
     make build
 
+## Installation
+
+* Download executable from [GitHub Releases](https://github.com/astappiev/slurm_exporter/releases) or build from sources; 
+* Copy the executable `slurm_exporter` to a node with access to the Slurm command-line interface;
+* Check options to disable/enable collectors and set the port to listen to `slurm_exporter -h`;
+* A [Systemd Unit](https://www.freedesktop.org/software/systemd/man/systemd.service.html) file to run the executable as service is available in [examples/systemd/slurm_exporter.service](examples/systemd/slurm_exporter.service).
+
 ## Exported Metrics
 
 ### State of the CPUs
@@ -134,13 +141,6 @@ counted with this parameter almost always indicates three issues:
 ### Share Information
 
 Collect _share_ statistics for every Slurm account. Refer to the [manpage of the sshare command](https://slurm.schedmd.com/sshare.html) to get more information.
-
-## Installation
-
-* Read [DEVELOPMENT.md](DEVELOPMENT.md) in order to build the Prometheus Slurm Exporter. After a successful build copy the executable
-`slurm_exporter` to a node with access to the Slurm command-line interface.
-
-* A [Systemd Unit](https://www.freedesktop.org/software/systemd/man/systemd.service.html) file to run the executable as service is available in [examples/systemd/slurm_exporter.service](examples/systemd/slurm_exporter.service).
 
 ## Prometheus Configuration for the SLURM exporter
 

@@ -42,25 +42,28 @@ type SchedulerMetrics struct {
 }
 
 func ParseSchedulerMetrics(input []byte) *SchedulerMetrics {
+	var (
+		st  = regexp.MustCompile(`^Server thread`)
+		qs  = regexp.MustCompile(`^Agent queue`)
+		dbd = regexp.MustCompile(`^DBD Agent`)
+		lc  = regexp.MustCompile(`^[\s]+Last cycle$`)
+		mc  = regexp.MustCompile(`^[\s]+Mean cycle$`)
+		cpm = regexp.MustCompile(`^[\s]+Cycles per`)
+		dpm = regexp.MustCompile(`^[\s]+Depth Mean$`)
+		tbs = regexp.MustCompile(`^[\s]+Total backfilled jobs \(since last slurm start\)`)
+		tbc = regexp.MustCompile(`^[\s]+Total backfilled jobs \(since last stats cycle start\)`)
+		tbh = regexp.MustCompile(`^[\s]+Total backfilled heterogeneous job components`)
+	)
+
 	var sm SchedulerMetrics
 	lines := SplitLines(input)
 	// Guard variables to check for string repetitions in the output of sdiag
-	// (two occurencies of the following strings: 'Last cycle', 'Mean cycle')
-	lc_count := 0
-	mc_count := 0
+	// (two occurrences of the following strings: 'Last cycle', 'Mean cycle')
+	lcCount := 0
+	mcCount := 0
 	for _, line := range lines {
 		if strings.Contains(line, ":") {
 			state := strings.Split(line, ":")[0]
-			st := regexp.MustCompile(`^Server thread`)
-			qs := regexp.MustCompile(`^Agent queue`)
-			dbd := regexp.MustCompile(`^DBD Agent`)
-			lc := regexp.MustCompile(`^[\s]+Last cycle$`)
-			mc := regexp.MustCompile(`^[\s]+Mean cycle$`)
-			cpm := regexp.MustCompile(`^[\s]+Cycles per`)
-			dpm := regexp.MustCompile(`^[\s]+Depth Mean$`)
-			tbs := regexp.MustCompile(`^[\s]+Total backfilled jobs \(since last slurm start\)`)
-			tbc := regexp.MustCompile(`^[\s]+Total backfilled jobs \(since last stats cycle start\)`)
-			tbh := regexp.MustCompile(`^[\s]+Total backfilled heterogeneous job components`)
 			switch {
 			case st.MatchString(state) == true:
 				sm.threads, _ = strconv.ParseFloat(strings.TrimSpace(strings.Split(line, ":")[1]), 64)
@@ -69,19 +72,17 @@ func ParseSchedulerMetrics(input []byte) *SchedulerMetrics {
 			case dbd.MatchString(state) == true:
 				sm.dbdQueueSize, _ = strconv.ParseFloat(strings.TrimSpace(strings.Split(line, ":")[1]), 64)
 			case lc.MatchString(state) == true:
-				if lc_count == 0 {
+				if lcCount == 0 {
 					sm.lastCycle, _ = strconv.ParseFloat(strings.TrimSpace(strings.Split(line, ":")[1]), 64)
-					lc_count = 1
-				}
-				if lc_count == 1 {
+					lcCount = 1
+				} else {
 					sm.backfillLastCycle, _ = strconv.ParseFloat(strings.TrimSpace(strings.Split(line, ":")[1]), 64)
 				}
 			case mc.MatchString(state) == true:
-				if mc_count == 0 {
+				if mcCount == 0 {
 					sm.meanCycle, _ = strconv.ParseFloat(strings.TrimSpace(strings.Split(line, ":")[1]), 64)
-					mc_count = 1
-				}
-				if mc_count == 1 {
+					mcCount = 1
+				} else {
 					sm.backfillMeanCycle, _ = strconv.ParseFloat(strings.TrimSpace(strings.Split(line, ":")[1]), 64)
 				}
 			case cpm.MatchString(state) == true:

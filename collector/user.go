@@ -40,11 +40,10 @@ func ParseMemory(input string) float64 {
 		return 0
 	}
 
-	reg := `^(\d+)([KMGT])$`
-	r := regexp.MustCompile(reg)
-	matchs := r.FindStringSubmatch(string(input))
-	num, _ := strconv.Atoi(matchs[1])
-	unit := matchs[2]
+	rMemory := regexp.MustCompile(`^(\d+)([KMGT])$`)
+	matches := rMemory.FindStringSubmatch(input)
+	num, _ := strconv.Atoi(matches[1])
+	unit := matches[2]
 	ret := 0
 	if "K" == unit {
 		ret = num * 1024
