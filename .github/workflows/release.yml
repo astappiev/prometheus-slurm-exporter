@@ -1,0 +1,34 @@
+name: Build and Publish artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    name: Build and upload artifacts
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.ref_name }}
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ^1.22
+      - uses: actions/checkout@v4
+
+      - name: Promu - Crossbuild
+        run: make crossbuild
+
+      - name: Promu - Prepare packages
+        run: make crossbuild-tarballs
+
+      - name: Calculate checksums
+        run: make crossbuild-checksum
+
+      - name: Upload artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .tarballs/*

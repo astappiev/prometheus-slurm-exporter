@@ -35,7 +35,7 @@ import (
 	"github.com/prometheus/exporter-toolkit/web"
 	"github.com/prometheus/exporter-toolkit/web/kingpinflag"
 
-	"github.com/vpenso/prometheus-slurm-exporter/collector"
+	"github.com/astappiev/slurm_exporter/collector"
 )
 
 var (

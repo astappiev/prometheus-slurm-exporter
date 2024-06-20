@@ -2,22 +2,33 @@
 
 Prometheus collector and exporter for metrics extracted from the [Slurm](https://slurm.schedmd.com/overview.html) resource scheduling system.
 
-## Build from source
+## Changes in this fork
+* Merged pending Pull Requests from original repository ([#43], [#53], [#54], [#62], [#65], [#70], [#83], [#94], [#96], [#99], [#106]);
+* Updated build tools and dependencies following `node_exporter` practices;
+* Each collector can be individually enabled/disabled using command line options;
+* Refactored code to improve readability and maintainability;
+* Refined and ensured fixtures and tests for each collector;
+* Automatic test and build using GitHub Actions;
+* Changed default port to `9341` (following [default port allocations](https://github.com/prometheus/prometheus/wiki/Default-port-allocations));
+* Targeted minimum supported Slurm version 18.08;
 
+[#106]: https://github.com/vpenso/prometheus-slurm-exporter/pull/106
+[#99]: https://github.com/vpenso/prometheus-slurm-exporter/pull/99
+[#96]: https://github.com/vpenso/prometheus-slurm-exporter/pull/96
+[#94]: https://github.com/vpenso/prometheus-slurm-exporter/pull/94
+[#83]: https://github.com/vpenso/prometheus-slurm-exporter/pull/83
+[#70]: https://github.com/vpenso/prometheus-slurm-exporter/pull/70
+[#65]: https://github.com/vpenso/prometheus-slurm-exporter/pull/65
+[#62]: https://github.com/vpenso/prometheus-slurm-exporter/pull/62
+[#54]: https://github.com/vpenso/prometheus-slurm-exporter/pull/54
+[#53]: https://github.com/vpenso/prometheus-slurm-exporter/pull/53
+[#43]: https://github.com/vpenso/prometheus-slurm-exporter/pull/43
 
-with dependencies downloaded:
-- github.com/prometheus/client_golang
-- github.com/prometheus/common
-- github.com/stretchr/testify
-```bash
-make download
-make all
-```
+## Building from source
 
-with dependencies already installed:
-```bash
-make all
-```
+You need a Go development environment. Then, simply run `make` to build the executables:
+
+    make build
 
 ## Exported Metrics
 
@@ -36,17 +47,12 @@ make all
 * **Allocated**: GPUs which have been allocated to a job.
 * **Other**: GPUs which are unavailable for use at the moment.
 * **Total**: total number of GPUs.
-* **Utilization**: total GPU utiliazation on the cluster.
+* **Utilization**: total GPU utilization on the cluster.
 
 - Information extracted from the SLURM [**sinfo**](https://slurm.schedmd.com/sinfo.html) and [**sacct**](https://slurm.schedmd.com/sacct.html) command.
 - [Slurm GRES scheduling](https://slurm.schedmd.com/gres.html)
 
-**NOTE**: since version **0.19**, GPU accounting has to be **explicitly** enabled adding the _-gpus-acct_ option to the command line otherwise it will not be activated.
-
-Be aware that:
-
-* According to issue #38, users reported that newer version of Slurm provides slightly different output and thus GPUs accounting may not work properly.
-* Users who do not have GPUs and/or do not have accounting activated may want to keep GPUs accounting **off** (see issue #45).
+**NOTE**: The collectors are managed in similar way to `node_exporter`, to disable the GPU collector, use the following command line option `--no-collector.gpus`.
 
 ### State of the Nodes
 
@@ -67,13 +73,9 @@ Be aware that:
 
 #### Additional info about node usage
 
-Since version **0.18**, the following information are also extracted and exported for **every** node known by Slurm:
-
 * CPUs: how many are _allocated_, _idle_, _other_ and in _total_.
 * Memory: _allocated_ and in _total_.
 * Labels: hostname and its Slurm status (e.g. _idle_, _mix_, _allocated_, _draining_, etc.).
-
-See the related [test data](https://github.com/vpenso/prometheus-slurm-exporter/blob/master/test_data/sinfo_mem.txt) to check the format of the information extracted from Slurm.
 
 ### Status of the Jobs
 
@@ -136,13 +138,9 @@ Collect _share_ statistics for every Slurm account. Refer to the [manpage of the
 ## Installation
 
 * Read [DEVELOPMENT.md](DEVELOPMENT.md) in order to build the Prometheus Slurm Exporter. After a successful build copy the executable
-`bin/prometheus-slurm-exporter` to a node with access to the Slurm command-line interface.
+`slurm_exporter` to a node with access to the Slurm command-line interface.
 
-* A [Systemd Unit][sdu] file to run the executable as service is available in [lib/systemd/prometheus-slurm-exporter.service](examples/systemd/prometheus-slurm-exporter.service).
-
-* (**optional**) Distribute the exporter as a Snap package: consult the [following document](packages/snap/README.md). **NOTE**: this method requires the use of [Snap](https://snapcraft.io), which is built by [Canonical](https://canonical.com).
-
-[sdu]: https://www.freedesktop.org/software/systemd/man/systemd.service.html
+* A [Systemd Unit](https://www.freedesktop.org/software/systemd/man/systemd.service.html) file to run the executable as service is available in [examples/systemd/slurm_exporter.service](examples/systemd/slurm_exporter.service).
 
 ## Prometheus Configuration for the SLURM exporter
 
@@ -154,14 +152,11 @@ scrape_configs:
 #
 # SLURM resource manager:
 #
-  - job_name: 'my_slurm_exporter'
-
+  - job_name: 'slurm_exporter'
     scrape_interval:  30s
-
     scrape_timeout:   30s
-
     static_configs:
-      - targets: ['slurm_host.fqdn:8080']
+      - targets: ['slurm_host.fqdn:9341']
 ```
 
 * **scrape_interval**: a 30 seconds interval will avoid possible 'overloading' on the SLURM master due to frequent calls of sdiag/squeue/sinfo commands through the exporter.
@@ -184,16 +179,16 @@ Checking prometheus.yml
 A [dashboard](https://grafana.com/dashboards/4323) is available in order to
 visualize the exported metrics through [Grafana](https://grafana.com):
 
-![Status of the Nodes](images/Node_Status.png)
+![Status of the Nodes](https://github.com/vpenso/prometheus-slurm-exporter/raw/master/images/Node_Status.png)
 
-![Status of the Jobs](images/Job_Status.png)
+![Status of the Jobs](https://github.com/vpenso/prometheus-slurm-exporter/raw/master/images/Job_Status.png)
 
-![SLURM Scheduler Information](images/Scheduler_Info.png)
+![SLURM Scheduler Information](https://github.com/vpenso/prometheus-slurm-exporter/raw/master/images/Scheduler_Info.png)
 
 
 ## License
 
-Copyright 2017-2020 Victor Penso, Matteo Dessalvi
+Copyright 2017-2024 Victor Penso, Matteo Dessalvi, Oleh Astappiev
 
 This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

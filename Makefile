@@ -16,8 +16,8 @@
 all: precheck style unused build test
 
 DOCKER_ARCHS      ?= amd64 arm64
-DOCKER_IMAGE_NAME ?= prometheus-slurm-exporter
-DOCKER_REPO       ?= vpenso
+DOCKER_IMAGE_NAME ?= slurm-exporter
+DOCKER_REPO       ?= astappiev
 
 include Makefile.common
 

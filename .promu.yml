@@ -4,7 +4,7 @@ go:
   version: 1.22
 
 repository:
-  path: github.com/vpenso/prometheus-slurm-exporter
+  path: github.com/astappiev/slurm_exporter
 build:
   binaries:
     - name: slurm_exporter
