@@ -7,6 +7,12 @@ import (
 	"testing"
 )
 
+func TestParseCPUs(t *testing.T) {
+	assert.Equal(t, CPUs{}, ParseCPUs(""))
+	assert.Equal(t, CPUs{alloc: 64, idle: 0, other: 64, total: 128}, ParseCPUs("64/0/64/128"))
+	assert.Equal(t, CPUs{alloc: 16, idle: 16, other: 224, total: 256}, ParseCPUs(" 16/16/224/256"))
+}
+
 func TestCPUsMetrics(t *testing.T) {
 	file, _ := os.Open("fixtures/sinfo/cpus.txt")
 	data, _ := io.ReadAll(file)

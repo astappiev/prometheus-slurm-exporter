@@ -33,15 +33,15 @@ type CPUs struct {
 }
 
 func ParseCPUs(input string) CPUs {
-	var cm CPUs
-	if strings.Contains(input, "/") {
+	var cpus CPUs
+	if len(input) > 0 && strings.Contains(input, "/") {
 		parts := strings.Split(strings.TrimSpace(input), "/")
-		cm.alloc, _ = strconv.ParseFloat(parts[0], 64)
-		cm.idle, _ = strconv.ParseFloat(parts[1], 64)
-		cm.other, _ = strconv.ParseFloat(parts[2], 64)
-		cm.total, _ = strconv.ParseFloat(parts[3], 64)
+		cpus.alloc, _ = strconv.ParseFloat(parts[0], 64)
+		cpus.idle, _ = strconv.ParseFloat(parts[1], 64)
+		cpus.other, _ = strconv.ParseFloat(parts[2], 64)
+		cpus.total, _ = strconv.ParseFloat(parts[3], 64)
 	}
-	return cm
+	return cpus
 }
 
 func ParseCPUsMetrics(input []byte) *CPUs {
