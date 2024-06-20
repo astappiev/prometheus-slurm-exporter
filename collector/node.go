@@ -31,34 +31,9 @@ type NodeMetrics struct {
 	memAlloc   float64
 	memTotal   float64
 	cpu        CPUs
-	tres       []TRES
-	tresUsed   []TRES
+	gres       []GenericResource
+	gresUsed   []GenericResource
 	nodeStatus string
-}
-
-type TRES struct {
-	kind  string
-	name  string
-	count float64
-}
-
-func ParseTres(input string) []TRES {
-	results := make([]TRES, 0)
-
-	// remove parenthesis and all content inside
-	for strings.Contains(input, "(") {
-		openIndex := strings.Index(input, "(")
-		closeIndex := strings.Index(input, ")")
-		input = input[:openIndex] + input[closeIndex+1:]
-	}
-
-	for _, single := range strings.Split(input, ",") {
-		tresInfo := strings.Split(single, ":")
-		tresCount, _ := strconv.ParseFloat(tresInfo[2], 64)
-		results = append(results, TRES{kind: tresInfo[0], name: tresInfo[1], count: tresCount})
-	}
-
-	return results
 }
 
 // ParseNodeMetrics takes the output of sinfo with node data
@@ -82,8 +57,8 @@ func ParseNodeMetrics(input []byte) map[string]*NodeMetrics {
 		memTotal, _ := strconv.ParseFloat(node[2], 64)
 
 		if len(node) >= 6 && node[5] != "(null)" && len(node[5]) > 0 {
-			nodes[nodeName].tres = ParseTres(node[5])
-			nodes[nodeName].tresUsed = ParseTres(node[6])
+			nodes[nodeName].gres = ParseGenericResources(node[5])
+			nodes[nodeName].gresUsed = ParseGenericResources(node[6])
 		}
 
 		nodes[nodeName].memAlloc = memAlloc
@@ -140,13 +115,13 @@ func (c *NodeCollector) Collect(ch chan<- prometheus.Metric) error {
 		ch <- prometheus.MustNewConstMetric(c.cpuTotal, prometheus.GaugeValue, nodes[node].cpu.total, node, nodes[node].nodeStatus)
 		ch <- prometheus.MustNewConstMetric(c.memAlloc, prometheus.GaugeValue, nodes[node].memAlloc, node, nodes[node].nodeStatus)
 		ch <- prometheus.MustNewConstMetric(c.memTotal, prometheus.GaugeValue, nodes[node].memTotal, node, nodes[node].nodeStatus)
-		if nodes[node].tresUsed != nil && len(nodes[node].tresUsed) != 0 {
-			for _, tres := range nodes[node].tresUsed {
+		if nodes[node].gresUsed != nil && len(nodes[node].gresUsed) != 0 {
+			for _, tres := range nodes[node].gresUsed {
 				ch <- prometheus.MustNewConstMetric(c.gpuAlloc, prometheus.GaugeValue, tres.count, node, nodes[node].nodeStatus, tres.name)
 			}
 		}
-		if nodes[node].tres != nil && len(nodes[node].tres) != 0 {
-			for _, tres := range nodes[node].tres {
+		if nodes[node].gres != nil && len(nodes[node].gres) != 0 {
+			for _, tres := range nodes[node].gres {
 				ch <- prometheus.MustNewConstMetric(c.gpuTotal, prometheus.GaugeValue, tres.count, node, nodes[node].nodeStatus, tres.name)
 			}
 		}

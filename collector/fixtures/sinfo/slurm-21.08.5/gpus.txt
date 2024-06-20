@@ -1,0 +1,3 @@
+3 gpu:2 gpu:(null):2(IDX:N/A)
+1 gpu:2 gpu:(null):1(IDX:N/A)
+20 gpu:2 gpu:(null):0(IDX:N/A)

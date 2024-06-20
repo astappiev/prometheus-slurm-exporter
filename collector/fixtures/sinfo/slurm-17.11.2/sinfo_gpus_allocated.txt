@@ -1,2 +1,0 @@
-xantipa gpu:4
-xantipa2 gpu:4

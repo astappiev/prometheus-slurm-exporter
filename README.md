@@ -52,11 +52,11 @@ You need a Go development environment. Then, simply run `make` to build the exec
 ### State of the GPUs
 
 * **Allocated**: GPUs which have been allocated to a job.
-* **Other**: GPUs which are unavailable for use at the moment.
+* **Idle**: GPUs which are idle and available for use.
 * **Total**: total number of GPUs.
 * **Utilization**: total GPU utilization on the cluster.
 
-- Information extracted from the SLURM [**sinfo**](https://slurm.schedmd.com/sinfo.html) and [**sacct**](https://slurm.schedmd.com/sacct.html) command.
+- Information extracted from the SLURM [**sinfo**](https://slurm.schedmd.com/sinfo.html) command.
 - [Slurm GRES scheduling](https://slurm.schedmd.com/gres.html)
 
 **NOTE**: The collectors are managed in similar way to `node_exporter`, to disable the GPU collector, use the following command line option `--no-collector.gpus`.
